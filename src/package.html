@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0068)http://java.sun.com/j2se/javadoc/writingdoccomments/package-template -->
+<HTML><HEAD>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252"><!--
+
+  @(#)package.html	1.00
+
+  Copyright 2005 Boden et al., The University of Queensland, All Rights Reserved.
+
+-->
+<META content="MSHTML 6.00.2900.2627" name=GENERATOR></HEAD>
+<BODY bgColor=white>
+
+Provides classes and interfaces for some machine learning techniques.
+
+<H2>Package Specification</H2>
+This package does not require any other packages.
+
+<H2>Related Documentation</H2>
+None but see Tutorials below.
+
+<H2>Tutorial: Implementing uninformed search</h2>
+
+<h3>General description</h3>
+<p>
+Search algorithms are defined by the combination of a Node and a State interface. A Node object represents a node in a search tree, and is associated with a single State in a problem. In this framework, there is no representation of a search tree outside of that defined within the Node objects (i.e., the parent, cost and depth fields) and the search function with its parameters.
+</p>
+<p>
+State is an Interface, rather than a Class, as the implementation of a State will necessarily be problem-specific. The reason that the State is a necessary component of the search algorithm is that different search algorithms (defined by Nodes) require different methods to be implemented by the problem States. For example, a min-max search needs a state evaluation function, as well as a function to tell the node whether it is a minimising or maximising node.
+</p>
+
+
+<h3>The basic classes/interfaces</h3>
+<ul>
+	<li>{@link search.Node} - The Node class represents a single node in the search tree of a problem, and is responsible for implementing a search algorithm.</li>
+	<li>{@link search.State} - A State class captures all of the essential elements of a particular problem, as well as containing the transition functions (Actions) that can be applied to a given state. A state should reflect - for the problem - all essential qualities of the world.</li>
+	<li>{@link search.Action} - The Action class is a simple structure that represents the possible transitions in the system - the actual logic for this is implemented within the State class, rather than the Action class.</li>
+	<li>{@link search.ActionStatePair} - The {@link search.ActionStatePair} class groups an Action and a State, since for a particular state one Action identifies the next State. As with the Action class, this is a simple structure used mostly for conceptual clarity.</li>
+</ul>
+<p>The {@link search.State} 
+interface defines a number of methods which are essential for the search 
+process.</p>
+<ul>
+	<li><font face="Courier">successor</font> - which returns a list of
+	{@link search.ActionStatePair}s</li>
+	<li><font face="Courier">goal</font> - if this state is a 'goal'</li>
+	<li><font face="Courier">pathcost</font> - the cost of taking a specific 
+	Action when in this state</li>
+</ul>
+<p>This way of implementing the {@link search.State} means that all {@link search.Action}s are kept track of by the state itself.</p>
+<p>The Node class implements several methods for constructing and traversing 
+the search path. We use a set of constructors.</p>
+<ul>
+	<li><font face="Courier">Node(State root)</font><br />where root is the initial state (from which we search)
+	</li>
+	<li><font face="Courier">Node(State state, Node parent, Action action, 
+	double cost)</font><br />where state is a current state which we got to by visiting the parent node and performing the specified action.
+	</li>
+</ul>
+<p>and we also use the following methods</p>
+<ul>
+	<li><font face="Courier">expand</font><br />which gives us the children of this 
+	Node instance</li>
+	<li><font face="Courier">getActions</font><br />which gives us the list of 
+	actions that took us here from the initial state. This method is used when 
+	we're done and want to know the &quot;solution.&quot;</li>
+</ul>
+<p>When all of this is in place, implementing something like breadth-first 
+search then becomes quite simple.</p>
+
+<pre>
+    /**
+     * Executes a breadth-first search from an initial state and with a queue/open list/fringe. 
+     * @param initial the initial, starting state
+     * @param fringe the list of all nodes that should be expanded, 
+     * usually empty.
+     * @return the solution node if one is found, null otherwise
+     */
+    public static Node breadthFirstSearch(State initial, List fringe) {
+        // add the initial state to the fringe
+        fringe.add(new Node(initial)); 
+        // loop through all nodes in the fringe
+        while (!fringe.isEmpty()) { // test if fringe is empty, if yes "failure"
+            // poll the first node in the list
+            Node head=(Node)fringe.get(0);
+            fringe.remove(0);
+            // pull out the state in the node
+            State state=head.getState();
+            // examine it to see if it is a goal state
+            if (state.goal()) {
+                return head; // if goal state then return this node
+            }
+            // consider using a "closed list" for visited states (avoiding repeated states)
+            
+            // expand the node, and add all new states to the fringe
+            fringe.addAll(Arrays.asList(head.expand())); // a list adds new nodes to the end of the queue
+        }
+        return null;
+    }
+</pre>
+
+<p>A simple application of the above framework is found in {@link search.fifteen.PuzzleState}. 
+Note that the only thing we need to change is the State (including defining the 
+{@link search.Action}s). With the above structures in place everything else follows 
+automatically (no need to change <font face="Courier">breadthFirstSearch</font>). 
+The application is in {@link search.fifteen.FifteenSearchApp}.</p>
+<p>Other uninformed search strategies are easily implemented by just changing 
+the way the fringe is operated upon. For example, depth-first search would 
+require you to change the addition of newly expanded nodes so that they appear 
+first in the fringe - not last as in breadth-first above.</p>
+<p>One important issue to consider in the code example above is that nodes are 
+expanded even if they have been visited before. This is particularly important 
+in depth-first search and when the search tree is infinite. A &quot;closed list&quot; can 
+be used as a store for already expanded states. Every time a new state is about 
+to be expanded we can search this list first to see if it's worthwhile.</p>
+
+<h2>Tutorial: Informed search - use the basic classes/interfaces</h2>
+<p>Next thing to consider is how to introduce domain knowledge to traverse the 
+search tree in an effective manner. The {@link search.fifteen.PuzzleState} 
+already has a helpful heuristic function: <font face="Courier">distance</font> 
+which returns (as the name suggests) a distance (the number of mismatching 
+tiles: board x compared to board y).</p>
+<p>A search procedure (operating on {@link search.Node}s) would 
+then need to consider such costs as reflected by the {@link search.State}s 
+involved (retrieved from the {@link search.Node}) when &quot;sorting&quot; 
+the nodes in the fringe.</p>
+<p>If you play with it you will see that there are many benefits of using 
+informed search on the fifteen puzzle.</p>
+
+<h2>Tutorial: Adversarial search - the MiniMax classes/interfaces</h2>
+<p>MiniMax can be implemented by extending the basic search classes/interfaces:</p>
+<ul>
+	<li>{@link search.MiniMaxState} - adds to the State interface<ul>
+		<li><font face="Courier">utility</font> - which returns how good the 
+		state is (intended for end states)</li>
+		<li><font face="Courier">isMaxState</font> - to figure out whether we 
+		want positive or a negative utility when we are searching with minimax</li>
+	</ul>
+	</li>
+	<li>{@link search.MiniMaxNode} - extends the Node class, 
+	primarily<ul>
+		<li>an <font face="Courier">expand</font> method (which is essentially 
+		the one in Node)</li>
+		<li>a <font face="Courier">value</font> method which recursively 
+		constructs and traverses the search tree, returning the utility 
+		propagated from the end nodes (there are two versions of this function: 
+		one with and one without alpha-beta pruning).</li>
+	</ul>
+	</li>
+</ul>
+<p>Minimax search is just an application of this <font face="Courier">value</font> 
+method as shown below (the non-alpha-beta-pruning version).</p>
+
+<pre>
+    /** 
+     * The minimax function which calculates the utility for this node.
+     *  If the state is non-terminal it uses the minimax strategy to create new nodes (with the expanded states).
+     *  See Russell and Norvig, Artificial Intelligence: A modern approach, 2nd ed., pp. 162-167. Prentice-Hall, 2003.
+     */
+    protected double value() {
+        // extract state from this node
+        MiniMaxState state=(MiniMaxState)getState();    
+        // test if this is a goal state for the player that acts
+        if (state.goal()) {                             
+            // calculates the value of the goal state (should be positive for the winning player, negative otherwise)
+            return state.utility();                     
+        } else if (getDepth()>MAXDEPTH) { // or if this is a state beyond expansion
+            return state.utility();
+        } else { // not a goal state
+            // ensure that the derived utilities will at least be an improvement from these values...
+            double maxUtility=-9999999;     
+            double minUtility=+9999999;
+            // expand the current node into descending nodes (alternating the active player)
+            Node[] succ=expand();
+            // test if this is a terminating, non-goal state, if so return what the state is "worth"
+            if (succ.length==0) {
+                return state.utility();
+            }
+            if (state.isMaxState()) { // MAX acts... we want to find the highest utility
+                // Each of the newly expanded nodes is explored 
+                for (int i=0; i&lt succ.length; i++) {
+                    maxUtility=Math.max(maxUtility, ((MiniMaxNode)succ[i]).value());
+                }
+                return maxUtility;
+            } else { // MIN acts ... we need to face the worst case (lowest utility) 
+                for (int a=0; a&lt succ.length; a++) {
+                    minUtility=Math.min(minUtility, ((MiniMaxNode)succ[a]).value());
+                }
+                return minUtility;
+            }
+        }
+    }
+</pre>
+<p>and the calling method looks like as follows.</p>
+
+<pre>
+    /**
+     * Perform a Mini-Max search from the specified initial state. 
+     * Amongst the descending "nodes", the one with the best utility is returned.
+     * What is "best" is determined by looking at whose turn it is (and that information
+     * is found in the initial Mini-Max state).
+     * Always just an "action" from the specified state. 
+     * @param initial The initial state
+     * @return the node that presents the best option for the current player (whoever it is)
+     */
+    public static MiniMaxNode minimaxSearch(MiniMaxState initial) {
+        MiniMaxNode root=new MiniMaxNode(initial);
+        Node[] choice=root.expand();
+        double[] util=new double[choice.length];
+        int best=0;
+        for (int i=0; i&lt choice.length; i++) {
+            util[i]=((MiniMaxNode)choice[i]).value();  // without alpha-beta pruning
+            System.out.print(util[i]+" ");  // debug by printing out all utility-values
+            // we select the action that gives the best future utility
+            // note that in some cases several actions may result in the same utility and that this 
+            // could present an opportunity to introduce arbitrary heuristics
+            if (initial.isMaxState()) { // we "MAX" is deciding what to do
+                if (util[i]>util[best]) 
+                    best=i;
+            } else { // opponent "MIN" is deciding
+                if (util[i]&lt util[best]) 
+                    best=i;
+            }
+        }
+        return (MiniMaxNode)choice[best];
+    }
+</pre>
+
+<h2>Tutorial: Using the MiniMax classes to play tic-tac-toe</h2>
+<p>To play tic-tac-toe on a 3x3 board (without replacement) is quite easy. 
+However, it is almost impossible to beat anyone but the beginner.</p>
+<p>We only need to implement one class (implementing the methods of
+{@link search.MiniMaxState}) to test how it works.</p>
+<p>Similar to {@link search.fifteen.PuzzleState}, {@link search.tictactoe.TTTState3x3} defines all {@link search.Action}s 
+involved in moving from state to state. A <font face="Courier">successor</font> 
+function needs to be defined but that allows the {@link search.MiniMaxNode} to automatically expand {@link search.ActionStatePair}s 
+(with all possible {@link search.Action} and
+{@link search.MiniMaxNode}:s).</p>
+<p>As hinted above, we need to define a <font face="Courier">utility</font> 
+function and keep track of whose turn it is (MAX or MIN).</p>
+<p>A test application to play with is {@link search.tictactoe.TTT3x3App}.</p>
+
+</BODY>
+
+</HTML>
