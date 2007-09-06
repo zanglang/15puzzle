@@ -133,7 +133,7 @@ public final class PuzzleState implements State {
      */
     public ActionStatePair[] successor() {
         //ArrayList list=new ArrayList<ActionStatePair>();
-        ArrayList list=new ArrayList();
+        ArrayList<ActionStatePair> list=new ArrayList<ActionStatePair>();
         for (int a=0; a<actionSequence.length; a++) {
             try {
                 State state=new PuzzleState(this, actionSequence[a]);
@@ -143,9 +143,9 @@ public final class PuzzleState implements State {
             } 
         }
         ActionStatePair[] pairs=new ActionStatePair[list.size()];
-        Iterator iter=list.iterator();
+        Iterator<ActionStatePair> iter=list.iterator();
         for (int i=0; iter.hasNext(); i++) {
-            pairs[i]=(ActionStatePair)iter.next();
+            pairs[i]=iter.next();
         }
         return pairs;
     }

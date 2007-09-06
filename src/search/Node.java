@@ -2,9 +2,6 @@ package search;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
-
-import search.fifteen.PuzzleState;
 
 
 /**
@@ -167,13 +164,13 @@ public class Node {
      * @return the solution node if one is found, null otherwise
      */
     //public static Node breadthFirstSearch(State initial, List<Node> fringe) {
-    public static Node breadthFirstSearch(State initial, List fringe) {
+    public static Node breadthFirstSearch(State initial, List<Node> fringe) {
         // add the initial state to the fringe
         fringe.add(new Node(initial)); 
         // loop through all nodes in the fringe
         while (!fringe.isEmpty()) { // test if fringe is empty, if yes "failure"
             // poll the first node in the list
-            Node head=(Node)fringe.get(0);
+            Node head=fringe.get(0);
             fringe.remove(0);
             // pull out the state in the node
             State state=head.getState();
