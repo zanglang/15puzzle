@@ -237,5 +237,4 @@ public final class PuzzleState implements State {
 		}
 		return sb.toString();
 	}
-
 }

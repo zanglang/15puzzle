@@ -5,16 +5,12 @@
 package search.fifteen;
 
 import search.Action;
-import search.Node;
 import search.State;
 
 /**
  * Node wrapper for Misplaced Tiles search
  */
-class MisplacedNode extends Node implements Comparable<MisplacedNode> {
-	// total number of misplaced titles
-	public int value;
-	
+class MisplacedNode extends SearchNode {
 	/**
 	 * Constructor
 	 * @param state Initial puzzle state
@@ -31,14 +27,14 @@ class MisplacedNode extends Node implements Comparable<MisplacedNode> {
 	 * @param state Resulting state of the action
 	 */
 	public MisplacedNode(MisplacedNode parent, Action action, State state) {
-		super(state, parent, action, parent.getCost() + state.pathcost(action));
+		super(parent, action, state);
 		calculateValue();
     }
 	
 	/**
 	 * Calculates the number of misplaced tiles in state
 	 */
-	private void calculateValue() {
+	protected void calculateValue() {
 		PuzzleState state = this.getState();
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -46,18 +42,6 @@ class MisplacedNode extends Node implements Comparable<MisplacedNode> {
 						!(i == 3 && j == 3))
 					value++;
 		// increment path cost to value
-		//value += this.getCost();
-	}
-	
-	public PuzzleState getState() {
-		return (PuzzleState)super.getState();
-	}
-	
-	/**
-	 * Comparing between two misplaced tiles nodes for closest search
-	 */
-	public int compareTo(MisplacedNode o) {
-		return o.value == value ? 0 :
-			o.value < value ? 1 : -1;
+		value += this.getCost();
 	}
 }
