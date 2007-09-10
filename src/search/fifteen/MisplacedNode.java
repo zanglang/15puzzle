@@ -42,6 +42,9 @@ class MisplacedNode extends SearchNode {
 						!(i == 3 && j == 3))
 					value++;
 		// increment path cost to value
-		value += this.getCost();
+		//value += this.getCost();
+			
+		if (!greedy)
+			value += (int) this.getCost();
 	}
 }

@@ -50,7 +50,7 @@ public class Searcher {
 			else
 				history.add(state);
 			
-			System.out.println(state.toString());			
+			//System.out.println(state.toString());			
 			// check if currently first node in fringe is goal state, if so,
 			// return because we've found a solution			
 			if (state.goal()) {

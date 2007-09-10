@@ -37,18 +37,28 @@ public class H2Node extends SearchNode {
 		PuzzleState goalState = new PuzzleState();
 		int[] tile, goalTile;
 		
-		// first component: find Manhattan distance for first wrong number
+		// first component: number of misplaced tiles
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++) {
+				// if tile is incorrect
+				if (goalState.tiles[i][j] == state.tiles[i][j])
+					continue;
+				// otherwise increment heuristic value
+				value++;
+				}
+				
+		// second component: find Manhattan distance for first wrong number
 		// and apply a high weight to it
 		for (int i = 1; i < 16; i++) {
 			tile = Tiles.findTile(i, state);
 			goalTile = Tiles.findTile(i, goalState);
 			if (tile[0] == goalTile[0] && tile[1] == goalTile[1])
 				continue;
-			value += Math.abs(tile[0] - goalTile[0]) + Math.abs(tile[1] - goalTile[1]);
+			value += (Math.abs(tile[0] - goalTile[0]) + Math.abs(tile[1] - goalTile[1]))*1.4;
 			break;
 		}
 		
-		// second component: distances of adjacent tiles
+		// third component: distances of adjacent tiles
 		int[] whiteTile = Tiles.findTile(0, state);
 		List<int[]> adjacentTiles = Tiles.findAdjacent(state,
 				whiteTile[0], whiteTile[1]);

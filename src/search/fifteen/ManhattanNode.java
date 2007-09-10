@@ -43,5 +43,7 @@ public class ManhattanNode extends SearchNode {
 				value += (Math.abs((tile[0] - i)) + Math.abs((tile[1] - j)));
 			}
 		}
+		if (!greedy)
+			value += (int) this.getCost();
 	}
 }
