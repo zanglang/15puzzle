@@ -13,8 +13,10 @@ public class FifteenSearchApp {
 	public static Searcher searchMhA = new Searcher(Algorithms.TEST_MH);
 	public static Searcher searchH2G = new Searcher(Algorithms.HEURISTIC_2);
 	public static Searcher searchH2A = new Searcher(Algorithms.HEURISTIC_2);
-	public static Searcher searchManhattan = new Searcher(Algorithms.MANHATTAN_DISTANCE);
-	public static Searcher searchMisplaced = new Searcher(Algorithms.MISPLACED_TILES);
+	public static Searcher searchManhattanG = new Searcher(Algorithms.MANHATTAN_DISTANCE);
+	public static Searcher searchManhattanA = new Searcher(Algorithms.MANHATTAN_DISTANCE);
+	public static Searcher searchMisplacedG = new Searcher(Algorithms.MISPLACED_TILES);
+	public static Searcher searchMisplacedA = new Searcher(Algorithms.MISPLACED_TILES);
 	public static Searcher searchTree = new Searcher(Algorithms.TREE);
 	
 	/**
@@ -31,7 +33,7 @@ public class FifteenSearchApp {
 		// PuzzleState InState = new PuzzleState();
 		// System.out.println(InState.toString());
 
-		PuzzleState myState = randomPuzzle(10);
+		PuzzleState myState = randomPuzzle(30);
 		PuzzleState myState2 = new PuzzleState(myState);
 
 		// or "shuffle" the tiles around manually a little bit...
@@ -46,66 +48,87 @@ public class FifteenSearchApp {
 		System.out.println("Initial state:");
 		System.out.println(myState2.toString());
 		
-		Action[] actionsMhG = solveTestMhG(new PuzzleState(myState));
-		Action[] actionsMhA = solveTestMhA(new PuzzleState(myState));
+		Action[] actionsMhG = solveH1G(new PuzzleState(myState));
+		Action[] actionsMhA = solveH1A(new PuzzleState(myState));
 		//Action[] actionsH2G = solveH2G(new PuzzleState(myState));
 		//Action[] actionsH2A = solveH2A(new PuzzleState(myState));
-		Action[] actionsManhattan = solveManhattan(new PuzzleState(myState));
-		Action[] actionsMisplaced = solveMisplaced(new PuzzleState(myState));
+		Action[] actionsManhattanG = solveManhattanG(new PuzzleState(myState));
+		Action[] actionsManhattanA = solveManhattanA(new PuzzleState(myState));
+		//Action[] actionsMisplacedG = solveMisplacedG(new PuzzleState(myState));
+		//Action[] actionsMisplacedA = solveMisplacedA(new PuzzleState(myState));
 		// Action[] actionsTree = solveTree(new PuzzleState(myState));
 		
 		printResults("TestMh with Greedy*", myState, actionsMhG);
 		printResults("TestMh with A*", myState, actionsMhA);
 		//printResults("Heuristic 2 with Greedy*", myState, actionsH2G);
 		//printResults("Heuristic 2 with A*", myState, actionsH2A);
-		printResults("Manhattan Distance search", myState, actionsManhattan);
-		printResults("Misplaced Tiles Search", myState, actionsMisplaced);
+		printResults("Manhattan Distance search with Greedy", myState, actionsManhattanG);
+		printResults("Manhattan Distance search with A*", myState, actionsManhattanA);
+		//printResults("Misplaced Tiles Search with Greedy", myState, actionsMisplacedG);
+		//printResults("Misplaced Tiles Search with A*", myState, actionsMisplacedA);
 		// printResults("Breadth First Search", myState, actionsTree);
 		
-		System.out.println("TestMh with Greedy depth: "
+		System.out.println("TestMh with Greedy depth:             "
 				+ actionsMhG.length
 				+ " nodes: "
 				+ searchMhG.nodesTraversedG
 				+ " EBF: "
 				+ Node.effectiveBranchingFactor(searchMhG.nodesTraversedG,
-						(actionsMhG.length - 1)));
-		System.out.println("TestMh with A* depth: "
+						(actionsMhG.length - 1))); 
+		System.out.println("TestMh with A* depth:                 "
 				+ actionsMhA.length
 				+ " nodes: "
 				+ searchMhA.nodesTraversedA
 				+ " EBF: "
 				+ Node.effectiveBranchingFactor(searchMhA.nodesTraversedA,
 						(actionsMhA.length - 1)));
-		/*System.out.println("Heuristic 2 with Greedy depth: "
+		/*System.out.println("Heuristic 2 with Greedy depth:        "
 				+ actionsH2G.length
 				+ " nodes: "
-				+ H2Search.nodesTraversedG
+				+ searchH2G.nodesTraversedG
 				+ " EBF: "
-				+ Node.effectiveBranchingFactor(H2Search.nodesTraversedG,
+				+ Node.effectiveBranchingFactor(searchH2G.nodesTraversedG,
 						(actionsH2G.length - 1)));
-		System.out.println("Heuristic 2 with A* depth: "
+		System.out.println("Heuristic 2 with A* depth:            "
 				+ actionsH2A.length
 				+ " nodes: "
-				+ H2Search.nodesTraversedA
+				+ searchH2A.nodesTraversedA
 				+ " EBF: "
-				+ Node.effectiveBranchingFactor(H2Search.nodesTraversedA,
+				+ Node.effectiveBranchingFactor(searchH2A.nodesTraversedA,
 						(actionsH2A.length - 1)));*/
-		System.out.println("Manhattan Distance depth: "
-				+ actionsManhattan.length
+		/*System.out.println("Misplaced Tiles depth with Greedy:    "
+				+ actionsMisplacedG.length
 				+ " nodes: "
-				+ searchManhattan.nodesTraversedA
+				+ searchMisplacedG.nodesTraversedG
 				+ " EBF: "
 				+ Node.effectiveBranchingFactor(
-						searchManhattan.nodesTraversedA,
-						(actionsManhattan.length - 1)));
-		System.out.println("Misplaced Tiles depth: "
-				+ actionsMisplaced.length
+						searchMisplacedG.nodesTraversedG,
+						(actionsMisplacedG.length - 1)));
+		System.out.println("Misplaced Tiles depth with A*      :  "
+				+ actionsMisplacedA.length
 				+ " nodes: "
-				+ searchMisplaced.nodesTraversedA
+				+ searchMisplacedA.nodesTraversedA
 				+ " EBF: "
 				+ Node.effectiveBranchingFactor(
-						searchMisplaced.nodesTraversedA,
-						(actionsMisplaced.length - 1)));
+						searchMisplacedA.nodesTraversedA,
+						(actionsMisplacedA.length - 1)));*/
+		System.out.println("Manhattan Distance depth with Greedy: "
+				+ actionsManhattanG.length
+				+ " nodes: "
+				+ searchManhattanG.nodesTraversedG
+				+ " EBF: "
+				+ Node.effectiveBranchingFactor(
+						searchManhattanG.nodesTraversedG,
+						(actionsManhattanG.length - 1)));
+		System.out.println("Manhattan Distance depth with A*    : "
+				+ actionsManhattanA.length
+				+ " nodes: "
+				+ searchManhattanA.nodesTraversedA
+				+ " EBF: "
+				+ Node.effectiveBranchingFactor(
+						searchManhattanA.nodesTraversedA,
+						(actionsManhattanA.length - 1)));
+		
 	}
 
 	/**
@@ -142,7 +165,7 @@ public class FifteenSearchApp {
 	}
 
 	// Improved Manhattan distance
-	public static Action[] solveTestMhA(PuzzleState state) {
+	public static Action[] solveH1A(PuzzleState state) {
 		TestMhNode.greedy = false;
 		Node goal = searchMhA.traverse(state);
 		Action[] actions = goal.getActions();
@@ -152,7 +175,7 @@ public class FifteenSearchApp {
 	}
 
 	// Improved Manhattan distance
-	public static Action[] solveTestMhG(PuzzleState state) {
+	public static Action[] solveH1G(PuzzleState state) {
 		TestMhNode.greedy = true;
 		Node goal = searchMhG.traverse(state);
 		Action[] actions = goal.getActions();
@@ -162,8 +185,18 @@ public class FifteenSearchApp {
 	}
 	
 	// Misplaced Tiles search
-	public static Action[] solveMisplaced(PuzzleState state) {
-		Node goal = searchMisplaced.traverse(state);
+	public static Action[] solveMisplacedG(PuzzleState state) {
+		TestMhNode.greedy = true;
+		Node goal = searchMisplacedG.traverse(state);
+		Action[] actions = goal.getActions();
+		System.out.println("Misplaced Search solved");
+
+		return actions;
+	}
+	
+	public static Action[] solveMisplacedA(PuzzleState state) {
+		TestMhNode.greedy = false;
+		Node goal = searchMisplacedA.traverse(state);
 		Action[] actions = goal.getActions();
 		System.out.println("Misplaced Search solved");
 
@@ -171,14 +204,22 @@ public class FifteenSearchApp {
 	}
 	
 	// Manhattan distance
-	public static Action[] solveManhattan(PuzzleState state) {
-		Node goal = searchManhattan.traverse(state);
+	public static Action[] solveManhattanG(PuzzleState state) {
+		TestMhNode.greedy = true;
+		Node goal = searchManhattanG.traverse(state);
 		Action[] actions = goal.getActions();
 		System.out.println("Manhattan Distance solved");
 
 		return actions;
 	}
-
+	
+	public static Action[] solveManhattanA(PuzzleState state) {
+		TestMhNode.greedy = false;
+		Node goal = searchManhattanA.traverse(state);
+		Action[] actions = goal.getActions();
+		System.out.println("Manhattan Distance solved");
+		return actions;
+	}
 	/**
 	 * Generate a solvable random puzzle.
 	 * 
